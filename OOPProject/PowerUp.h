@@ -4,6 +4,7 @@
 #include <time.h>
 #include <iostream>
 using namespace std;
+using namespace sf;
 
 class PowerUp {
 private:
@@ -15,6 +16,7 @@ public:
     Texture texture;
     Clock timer;
     PowerUp() {
+        srand(time(0));
         duration = 0;
         startTime = 0;
 
@@ -30,7 +32,7 @@ public:
 
     void activate(float stime) {
         Active = true;
-        duration = 500;
+        duration = 1000.0f;
         startTime = stime;
         sprite.setPosition(-1000, -1000);
         //timer.restart();
@@ -46,9 +48,9 @@ public:
         }
     }
 
-    void update(float Dtime) {
+    void update(float timer) {
         if (Active) {
-			duration -= (Dtime - startTime);
+			duration -= (timer - startTime);
             if (duration <= 0) {
                 Active = false;
             }

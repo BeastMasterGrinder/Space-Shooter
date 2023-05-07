@@ -35,5 +35,14 @@
     <ClInclude Include="PowerUp.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Danger.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lives.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

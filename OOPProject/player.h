@@ -1,4 +1,5 @@
 #include"bullet.h"
+#include<cmath>
 using namespace sf;
 class Player{
 
@@ -13,19 +14,22 @@ public:
 	
 	Texture tex;
 	Sprite sprite;
-	vector<Bullet> bullets;
+	vector<Bullet*> bullets;
 	float speed=0.1;
 	int x,y;
 
 	bool powerup = false;
+	bool Fire;
+	int health = 100;
 
 
 	Player(std::string png_path)
 	{
-		
+		Fire = false;
+
 		timer = 0;
 		
-		bullets = std::vector<Bullet>();
+		
 
 
 		sprite.setColor(sf::Color(255, 255, 255, 255));
@@ -44,11 +48,11 @@ public:
 		sprite.setScale(0.75,0.75);
 	}
 	//called when player presses space bar
-	void fire()
-	{
-		//create a bullet object and add it to the list of bullets
+	//void fire()
+	//{
+	//	//create a bullet object and add it to the list of bullets
 
-	}
+	//}
 	void move(std::string s){
 		float delta_x=0,delta_y=0;
 		if(s=="l")
@@ -83,31 +87,60 @@ public:
 		x = x + delta_x;
 		y = y + delta_y;
 
+		//making sure the player doesn't go out of the screen
+		if (x < 0)
+			x = 0;
+		if (x > 700)
+			x = 700;
+		if (y < 0)
+			y = 0;
+		if (y > 700)
+			y = 700;
+
 		sprite.setPosition(Vector2f(x,y));
 
 		sprite.move(delta_x, delta_y);
 
 	}
-	void shoot() {
-			const float shoot_interval = 0.5f; // interval between shots in seconds
-			if (timer < shoot_interval) {
-				return; // don't shoot yet
-			}
+	void shoot(RenderWindow* window, float gametime) {
+		const float shoot_interval = 0.5f; // interval between shots in seconds
+		if (gametime < timer + shoot_interval) {
+			return; // don't shoot yet
+		}
 		if (!powerup) {
 			//create a bullet object and add it to the list of bullets
 			//img / player_ship.png
-			Bullet new_bullet("img/PNG/Lasers/laserRed02.png", x, y);
+			Bullet* new_bullet = new Bullet(window, "img/PNG/Lasers/laserBlue12.png", x, y);//img\PNG\Lasers
 			//cout << "bullet shot\n";
 			bullets.push_back(new_bullet);
-			timer = 0;
+			
 		}
-		else {
-			for (int i = 0; i < 7; i++)
-			{
-				Bullet new_bullet("img/PNG/Lasers/laserGreen04.png", x, y); // create a new bullet object
-				new_bullet.sprite.setRotation(i * 45); // set the rotation angle for the bullet sprite
-				bullets.push_back(new_bullet); // add the bullet to the vector
+		else if (Fire) {	//in Fire mode 
+			Bullet* fire_bullet = new Bullet(window, "img/PNG/Effects/fire02.png", x, y);
+			fire_bullet->damage = 100;
+			bullets.push_back(fire_bullet);
+
+		}
+		else {	//in power up mode
+			int x = sprite.getPosition().x + 50;
+			int y = sprite.getPosition().y + 50;
+			float radius = 100.0f; // Adjust the radius of the umbrella arch
+
+			for (int i = 0; i < 7; i++) {
+				float angle = (i - 3) * 30.0f; // Adjust the angle between bullets
+
+				float bulletX = x + radius * sin(angle * 3.14159f / 180.0f);
+				float bulletY = y - radius * cos(angle * 3.14159f / 180.0f);
+
+				Bullet* new_bullet = new Bullet(window, "img/PNG/Lasers/laserGreen04.png", bulletX, bulletY); // Create a new bullet object
+
+				//new_bullet->sprite.setRotation(angle + 90.0f); // Set the rotation angle for the bullet sprite (add 90 degrees to make it face upwards)
+				bullets.push_back(new_bullet); // Add the bullet to the vector
 			}
+
+
+			
 		}
+		timer = gametime;
 	}
 };

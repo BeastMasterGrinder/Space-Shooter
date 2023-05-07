@@ -17,23 +17,34 @@ public:
 	float speed = 0.1;
 	Texture tex;
 	Sprite sprite;
-	Bullet(string png_path, int x, int y)
+	int damage;
+
+
+	Bullet(RenderWindow* window, string png_path, int x, int y)
 	{
 		sprite.setColor(sf::Color(255, 255, 255, 255));
 		if (!tex.loadFromFile(png_path)) {
 			cout << "unable to load bullet image\n";
 		}
+		//sprite.setTextureRect(IntRect(10, 10, 20, 20));
 		sprite.setTexture(tex);
-		sprite.setTextureRect(IntRect(0, 0, 10, 10));
 		this->x = x;
 		this->y = y;
 		sprite.setPosition(Vector2f(x, y));
-		sprite.setScale(0.75, 0.75);
+		//sprite.setScale(0.75, 0.75);
+		damage = 20;
 	}
-	void move()
+	void move(bool bomb)
 	{
-		y -= speed * 10;
-		sprite.setPosition(Vector2f(x, y));
-		sprite.move(0, -speed);
+		if (!bomb) {
+			y -= speed * 10;
+			sprite.setPosition(Vector2f(x, y));
+			sprite.move(0, -speed);
+		}
+		else {
+			y += speed * 10;
+			sprite.setPosition(Vector2f(x, y));
+			sprite.move(0, speed);
+		}
 	}
 };
