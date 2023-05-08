@@ -97,7 +97,7 @@ public:
             //sprite.setTextureRect(sf::IntRect(0, 0, 300, 300));
 
 			score = 40 * enemyLevel;
-			dropInterval = 3.0f; // 3 seconds interval
+			dropInterval = 2.0f; // 3 seconds interval
 			health = 2500;
 			//sprite.setTexture(Monster); // Replace with the appropriate texture for Gamma Invader
             sprite.setScale(0.5f, 0.5f);
@@ -108,7 +108,7 @@ public:
             //sprite.setTextureRect(sf::IntRect(0, 0, 400, 400));
 
             score = 50 * enemyLevel;
-            dropInterval = 5.0f; // 5.0 seconds interval
+            dropInterval = 2.0f; // 5.0 seconds interval
             health = 10000;
             //sprite.setTexture(Dragon); // Replace with the appropriate texture for Gamma Invader
             sprite.setPosition(sf::Vector2f(100, 10)); // Set the initial position
@@ -143,22 +143,28 @@ public:
         Bullet* bomb = new Bullet(window, "img/PNG/Lasers/laserGreen03.png", sprite.getPosition().x, sprite.getPosition().y);
         
         if (enemyLevel == 2) {
-            int x = sprite.getPosition().x + 100;
+            int x = sprite.getPosition().x;
             int y = sprite.getPosition().y + 400;
             float radius = 100.0f; // Adjust the radius of the umbrella arch
 
             for (int i = 0; i < 5; i++) {
                 
 
-                Bullet* new_bullet = new Bullet(window, "img/PNG/Lasers/laserGreen04.png", x, y); // Create a new bullet object
+                Bullet* new_bullet = new Bullet(window, "img/PNG/Effects/fire01.png", x, y); // Create a new bullet object
+                new_bullet->speed = 1.5f;
+                new_bullet->damage = 50;
+                new_bullet->sprite.setRotation(180);
 
                 //new_bullet.sprite.setRotation(/*angle*/ + 90.0f); // Set the rotation angle for the bullet sprite (add 90 degrees to make it face upwards)
                 bullets.push_back(new_bullet); // Add the bullet to the vector
                 x +=50;
             }
-            bomb->damage = 50;
+            /*bomb->damage = 50;
+            bomb->speed = 1.2f;
+            bullets.push_back(bomb);*/
         }
         else if (enemyLevel == 3) {
+            
             int x = sprite.getPosition().x + 200;
             int y = sprite.getPosition().y + 200;
 
@@ -167,7 +173,7 @@ public:
             float dy = spaceshipY - y;
 
             // Calculate the magnitude of the direction vector
-            float magnitude = std::sqrt(dx * dx + dy * dy);
+            float magnitude = sqrt(dx * dx + dy * dy);
 
             // Normalize the direction vector
             float directionX = dx / magnitude;
@@ -177,31 +183,44 @@ public:
             float bulletX = x + directionX * 100.0f;
             float bulletY = y + directionY * 100.0f;
 
-            Bullet* new_bullet = new Bullet(window, "img/PNG/Lasers/laserGreen04.png", bulletX, bulletY); // Create a new bullet object
+            
 
             // Set the rotation angle for the bullet sprite to point towards the spaceship
-            float angle = std::atan2(directionY, directionX) * 180.0f / 3.14159f;
-            new_bullet->sprite.setRotation(angle);
+            float angle = std::atan2(spaceshipY - bulletY, spaceshipX - bulletX) * 180.0f / 3.14159f;
+            float currentAngle = angle;
 
-            bullets.push_back(new_bullet); // Add the bullet to the vector
+            // Create four bullets
+            for (int i = 0; i < 4; ++i) {
+                Bullet* new_bullet = new Bullet(window, "img/PNG/Effects/fire10.png", bulletX, bulletY); // Create a new bullet object
 
-            // Rest of the code...
-            bomb->damage = 100;
+                new_bullet->sprite.setRotation(currentAngle); // Set the rotation angle for the bullet sprite
+                new_bullet->speed = 2.0f;
+                
+                //new_bullet->sprite.setRotation(180);
+                bullets.push_back(new_bullet); // Add the bullet to the vector
+
+                currentAngle += angle; // Increment the angle for the next bullet
+            }
+
+        }
+        else {
+            bomb->speed = 1.0;
+            bomb->sprite.setRotation(180);
+            bullets.push_back(bomb);
         }
 
-        bullets.push_back(bomb);
         
 
 
     }
 
-    void move_bomb() {
-        		// Logic for moving the bullet
-		// Move the bullet
-        for (int i = 0; i < bullets.size(); i++) {
-			bullets[i]->move(true);
-		}
-    }
+  //  void move_bomb() {
+  //      		// Logic for moving the bullet
+		//// Move the bullet
+  //      for (int i = 0; i < bullets.size(); i++) {
+		//	bullets[i]->move(true);
+		//}
+  //  }
 
     bool takeDamage(int damage) {
         health -= damage;
@@ -217,13 +236,13 @@ public:
 
     void move() {
         //moving monster and dragon right and left within the screen
-        if (Etype == enemytype::Monster || Etype == enemytype::Dragon) {
+        if (Etype == enemytype::Monster /*|| Etype == enemytype::Dragon*/) {
             if (moving_right) {
                 if (sprite.getPosition().x + sprite.getGlobalBounds().width >= 780) {
                     moving_right = false;
                 }
                 else {
-                    sprite.move(1.0f, 0.0f); // Move the sprite to the right
+                    sprite.move(1.5f, 0.0f); // Move the sprite to the right
                 }
             }
             else {
@@ -231,16 +250,12 @@ public:
                     moving_right = true;
                 }
                 else {
-                    sprite.move(-1.0f, 0.0f); // Move the sprite to the left
+                    sprite.move(-2.0f, 0.0f); // Move the sprite to the left
                 }
             }
 
             // Rest of the code...
         }
-
-
-
-        
         
     }
 

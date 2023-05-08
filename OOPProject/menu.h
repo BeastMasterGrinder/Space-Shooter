@@ -1,6 +1,52 @@
 #pragma once
 #include <fstream>
+#include <sstream>
 #include "game.h"
+
+struct HighScore {
+    int score;
+    int level;
+};
+
+// Custom comparator for sorting the high scores in descending order
+bool compareHighScores(const HighScore& a, const HighScore& b) {
+    return a.score > b.score;
+}
+
+void insertHighScore(int score, int level) {
+    vector<HighScore> highScores;
+
+    // Read existing high scores from file
+    ifstream inputFile("highscore.txt");
+    HighScore currentHighScore;
+    string line;
+    while (getline(inputFile, line)) {
+        istringstream iss(line);
+        string prefix;
+        int scoreVal, levelVal;
+        if (iss >> prefix >> scoreVal >> prefix >> levelVal) {
+            HighScore currentHighScore = { scoreVal, levelVal };
+            highScores.push_back(currentHighScore);
+        }
+    }
+    inputFile.close();
+
+    // Insert the new score and level
+    HighScore newHighScore = { score, level };
+    highScores.push_back(newHighScore);
+
+    // Sort the high scores in descending order
+    sort(highScores.begin(), highScores.end(), compareHighScores);
+
+    // Write the sorted scores back to the file
+    ofstream outputFile("highscore.txt");
+    for (const auto& highScore : highScores) {
+        outputFile << "Score: " << highScore.score << " Level: " << highScore.level << endl;
+    }
+    outputFile.close();
+}
+
+
 class Menu{
 public:
     int lifes;
@@ -14,6 +60,7 @@ public:
     Texture texture;
     Sprite menuBackground;
     Text text1, text2, text3, text4, text5;
+    vector<Text*> highsScores;
     
     Font font;
     Menu()
@@ -71,7 +118,7 @@ public:
     {
         srand(time(0));
         Game g; //create a game object
-        //g.make_enemies();
+        
         RenderWindow window(VideoMode(780, 780), "OOP-Project, Spring-2023");
 
         /*Sprite menuBackground(texture);
@@ -86,7 +133,7 @@ public:
             if (isGameStarted && lifes > 0) {    //start game
                 g.level = level;
                 g.lifes = lifes;
-                //g.level = 3;
+                
 
                 g.make_enemies();
 				gameStatus = g.start_game(window, score);
@@ -143,11 +190,37 @@ public:
                 if (event.type == Event::KeyPressed && event.key.code == Keyboard::I) {
 					//display instructions
 					display_instructions_menu(window);
+
+                    text1.setFont(font);
+                    text2.setFont(font);
+                    text1.setString("Space Shooter");
+                    text1.setCharacterSize(100);
+                    text1.setPosition(Vector2f(100, 50));
+                    text2.setString("Press Space to start the game");
+                    text2.setCharacterSize(35);
+                    text2.setPosition(Vector2f(150, 300));
+                    text3.setString("Press I for Instructions");
+                    text4.setString("Press H for High Scores");
+
+                    text3.setPosition(Vector2f(150, 400));
+                    text4.setPosition(Vector2f(150, 500));
+
 				}
                 if (event.type == Event::KeyPressed && event.key.code == Keyboard::H) {
                     display_high_score_menu(window);
+
+                    text1.setFont(font);
+                    text2.setFont(font);
+                    text1.setString("Space Shooter");
+                    text1.setCharacterSize(100);
+                    text1.setPosition(Vector2f(100, 50));
+                    text2.setString("Press Space to start the game");
+                    text2.setCharacterSize(35);
+                    text2.setPosition(Vector2f(150, 300));
+                    text3.setString("Press I for Instructions");
+                    text3.setPosition(Vector2f(150, 400));
                     
-                    window.clear(Color::Black);
+                    
                 }
                 if (event.type == Event::Closed) // If cross/close is clicked/pressed
                     window.close(); //close the game 
@@ -187,10 +260,7 @@ public:
         }
 
 
-        std::ofstream file;
-        file.open("highscore.txt", std::ios::app);
-        file << "Score: " << score << " Level: " << level << std::endl;
-        file.close();
+        insertHighScore(score, level);
 
 
 
@@ -198,6 +268,26 @@ public:
 
     void display_game_win(RenderWindow& window)
     {//display game win screen here
+        text1.setString("YAY you won poggers");
+        //print the score
+        text2.setString("Score: " + to_string(score));
+
+        text1.setPosition(Vector2f(150, 400));
+        text2.setPosition(Vector2f(150, 600));
+
+        while (window.isOpen()) {
+			Event event2;
+            while (window.pollEvent(event2)) {
+                if (event2.type == Event::KeyPressed && event2.key.code == Keyboard::Escape) {
+                    window.close();
+                    return;
+                }
+                window.clear(Color::Black);
+                window.draw(menuBackground);
+                window.draw(text1);
+                window.draw(text2);
+            }
+        }
 
 	}
 
@@ -214,7 +304,7 @@ public:
 
         text2.setPosition(Vector2f(150, 200));
         text3.setPosition(Vector2f(150, 300));
-        text4.setPosition(Vector2f(50, 350));
+        text4.setPosition(Vector2f(10, 350));
 
         while (window.isOpen()) {
 			Event event2;
@@ -238,20 +328,32 @@ public:
 	}
 
     void display_high_score_menu(RenderWindow& window) {
-        //reading high score from txt file and displaying it on the screen
-        text1.setString("High Score");
+        // Reading high scores from the txt file and displaying the top 3 scores on the screen
+        text1.setString("High Scores");
         text2.setString("Press BackSpace to go back now");
-        std::ifstream file;
-        file.open("highscore.txt");
-        std::string line;
+        text3.setString("Top 3 Scores:");
+        text1.setPosition(Vector2f(150, 100));
+        text2.setPosition(Vector2f(150, 600));
+        text3.setPosition(Vector2f(300, 250));
+
+        ifstream file("highscore.txt");
+        string line;
         int i = 0;
-        while (std::getline(file, line)) {
-			text3.setString(line);
-			text3.setPosition(Vector2f(150, 150 + i * 50));
-			window.draw(text3);
-			i++;
-		}
+
+        while (getline(file, line) && i < 3) {
+            Text* text = new Text; 
+            text->setFont(font);
+            text->setCharacterSize(20);
+            text->setFillColor(Color::White);
+
+            text->setString(line);
+            highsScores.push_back(text);
+            
+            i++;
+        }
+
         file.close();
+
         Event event2;
         while (window.isOpen()) {
             while (window.pollEvent(event2)) {
@@ -259,16 +361,24 @@ public:
                     return;
                 }
                 if (event2.type == Event::Closed) // If cross/close is clicked/pressed
-                    window.close(); //close the game
+                    window.close(); // Close the game
             }
             window.clear(Color::Black);
             window.draw(menuBackground);
             window.draw(text1);
             window.draw(text2);
+            window.draw(text3);
+            //print the high scores
+            for (int i = 0; i < highsScores.size(); i++) {
+				highsScores[i]->setPosition(Vector2f(300, 300 + i * 40));
+                highsScores[i]->setFillColor(Color::Green);
+				window.draw(*highsScores[i]);
+			}
             window.display();
         }
         window.clear(Color::Black);
-	}
+    }
+
 
 
 

@@ -95,18 +95,27 @@ public:
             enemies[4]->sprite.setPosition(400, 200);
             enemies[5]->sprite.setPosition(300, 300);
             num_enemies = 6;
+            p->health = 100;
+            for (int i = 0; i < p->bullets.size(); i++) {
+                //reversing the rotation of the bullets
+                p->bullets[i]->sprite.setRotation(180);
+				p->bullets[i]->damage = 10;
+			}
         }
         else if (level == 2) {
             enemies.push_back(new Enemy(Enemy::enemytype::Monster, 2));
             //positioning monster in middle
             enemies[0]->sprite.setPosition(200, 50);
             num_enemies = 1;
+            p->health = 300;
+
         }
         else if (level == 3) {
             enemies.push_back(new Enemy(Enemy::enemytype::Dragon, 3));
             //positioning dragon in middle
             enemies[0]->sprite.setPosition(300, 100);
             num_enemies = 1;
+            p->health = 500;
         }
     }
 
@@ -333,7 +342,7 @@ public:
                 p->bullets[i].y = p->y + 100;*/
                 //p->bullets[i].sprite.setPosition(Vector2f((p->x - 20) + (i * 10), p->y + 10));
                 
-                p->bullets[i]->move(false);
+                p->bullets[i]->move(false, p->sprite.getPosition().x, p->sprite.getPosition().y);
                 window.draw(p->bullets[i]->sprite);
             }
             /*if (timer > 20) {
@@ -386,7 +395,7 @@ public:
             time_string.setString("Time: " + to_string((int)timer));
 			
             //Moving Danger sign
-            if (timer > 10.0f) {
+            if (int(timer) % int(10.0) == 0 ) {
                 danger.move();
             }
             //moving Lifes
@@ -404,13 +413,13 @@ public:
 	    window.draw(p->sprite);   // setting player on screen
         
         for (int i = 0; i < p->bullets.size(); i++) {
-            p->bullets[i]->move(false);
+            p->bullets[i]->move(false, p->sprite.getPosition().x, p->sprite.getPosition().y);
             window.draw(p->bullets[i]->sprite);
         }
         //Draw enemies
         for (int i = 0; i < enemies.size(); i++) {
             for (int j = 0; j < enemies[i]->bullets.size(); j++) {
-				enemies[i]->bullets[j]->move(true);
+				enemies[i]->bullets[j]->move(true, p->sprite.getPosition().x, p->sprite.getPosition().y);
 				window.draw(enemies[i]->bullets[j]->sprite);
 			}
 			window.draw(enemies[i]->sprite);
