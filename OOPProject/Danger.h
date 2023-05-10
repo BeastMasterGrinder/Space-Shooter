@@ -11,13 +11,13 @@ class Danger
 public:
 	Sprite sprite;
 	Texture texture;
-	Clock timer;
+	
 	Danger() {
 		int windowWidth = 780;
 		int windowHeight = 780;
 		// Load power-up texture and set its position randomly
 		sprite.setColor(sf::Color(255, 255, 255, 255));
-		if(!texture.loadFromFile("img/PNG/Meteors/meteorGrey_big2.png"))
+		if (!texture.loadFromFile("img/PNG/Meteors/meteorGrey_big2.png"))
 			cout << "unable to load danger texture\n";
 
 		sprite.setTexture(texture);

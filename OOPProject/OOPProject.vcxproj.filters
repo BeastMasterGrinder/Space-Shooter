@@ -18,30 +18,33 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="game.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="menu.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="player.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="bullet.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="PowerUp.h">
+    <ClInclude Include="Danger.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Enemy.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Danger.h">
+    <ClInclude Include="Game.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Lives.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerUp.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

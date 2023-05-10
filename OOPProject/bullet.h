@@ -6,7 +6,7 @@
 using namespace std;
 using namespace sf;
 
-class Bullet : public Drawable
+class Bullet
 {
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
@@ -50,4 +50,5 @@ public:
 			sprite.move(directionX * speed, directionY * speed);
 		}
 	}
+
 };

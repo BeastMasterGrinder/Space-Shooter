@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Enemy.h"
 #include "player.h"
 #include "PowerUp.h"
@@ -9,13 +8,13 @@
 const char title[] = "OOP-Project, Spring-2023";
 using namespace sf;
 
-
 class Game
 {
     int fireused = 1;
     float fireInitiat_time;
+    bool isPaused;
 public:
-    Text Life, Score, Level, time_string;
+    Text Life, Score, Level, time_string, Paused_text1, Paused_text2;
     Font font;
 
     Sprite background; //Game background sprite
@@ -29,22 +28,25 @@ public:
     vector<Enemy*> enemies;
     Danger danger;
     Lives_power lives_power;
-    
+
     int num_enemies;
 
 
-    Game()
-    {
-        fireused = 1;
+    Game(void) {
+        fireused = 3;
         fireInitiat_time = 0.0f;
         level = 1;
-        p=new Player("img/player_ship.png");
-        
-        bg_texture.loadFromFile("img/background1.jpg");
+        lifes = 3;
+        num_enemies = 5;
+        isPaused = false;
+
+        p = new Player("img/player_ship.png");
+
+        bg_texture.loadFromFile("img/background.jpg");
         background.setTexture(bg_texture);
         background.setScale(2, 1.5);
 
-        
+
         if (!font.loadFromFile("Sofia-Regular.otf"))
         {
             std::cout << "Error loading font" << std::endl;
@@ -66,6 +68,16 @@ public:
         time_string.setString("Time: 0");
         time_string.setCharacterSize(35);
         time_string.setPosition(Vector2f(600, 10));
+        Paused_text1.setFont(font);
+        Paused_text1.setString("Game Paused");
+        Paused_text1.setCharacterSize(100);
+        Paused_text1.setPosition(Vector2f(80, 200));
+        Paused_text1.setFillColor(Color::White);
+        Paused_text2.setFont(font);
+        Paused_text2.setString("Press Enter to resume");
+        Paused_text2.setCharacterSize(50);
+        Paused_text2.setPosition(Vector2f(100, 400));
+        Paused_text2.setFillColor(Color::White);
 
 
         Score.setFillColor(Color::White);
@@ -80,6 +92,8 @@ public:
     }
 
     void make_enemies() {
+        //erase all enemies first
+        enemies.clear();
         if (level == 1) { //make 3 enemies of alpha 2 enemies of beta and 1 of gamma
             enemies.push_back(new Enemy(Enemy::enemytype::Alpha, 1));
             enemies.push_back(new Enemy(Enemy::enemytype::Alpha, 1));
@@ -99,14 +113,15 @@ public:
             for (int i = 0; i < p->bullets.size(); i++) {
                 //reversing the rotation of the bullets
                 p->bullets[i]->sprite.setRotation(180);
-				p->bullets[i]->damage = 10;
-			}
+                p->bullets[i]->damage = 10;
+            }
         }
         else if (level == 2) {
             enemies.push_back(new Enemy(Enemy::enemytype::Monster, 2));
             //positioning monster in middle
             enemies[0]->sprite.setPosition(200, 50);
             num_enemies = 1;
+            
             p->health = 300;
 
         }
@@ -115,65 +130,50 @@ public:
             //positioning dragon in middle
             enemies[0]->sprite.setPosition(300, 100);
             num_enemies = 1;
-            p->health = 500;
+            //p->speed = 1.50f;
+            p->health = 1000;
         }
     }
 
     int start_game(RenderWindow& window, int& score)    //returns 1 is player goes to next level, 0 if player dies, -1 if player quits
     {
-        
+
         //RenderWindow window(VideoMode(780, 780), title);//to change these chang it in PowerUp.h too
         Clock clock;
-        float timer=0;
+        float timer = 0;
         float enemy_timer = 0;
 
+        make_enemies();
+
         p->timer = 0;
+        p->sprite.setPosition(350, 780);
+        window.draw(p->sprite);
 
         while (window.isOpen())
         {
-            float time = clock.getElapsedTime().asSeconds(); 
+            float time = clock.getElapsedTime().asSeconds();
             float ptime = clock.restart().asSeconds();
 
             clock.restart();
-            timer += time;  
+            timer += time;
             //timer for shooting
             //p->timer += ptime;
-            for(int i=0;i<enemies.size();i++)
-				enemies[i]->timeSinceLastDrop += ptime;
+            for (int i = 0; i < enemies.size(); i++)
+                enemies[i]->timeSinceLastDrop += ptime;
             //cout<<timer<<endl;
 
             //make_enemies();
 
-            
 
 
- 	        Event e;
+
+            Event e;
             while (window.pollEvent(e))
-            {  
+            {
                 if (e.type == Event::Closed) // If cross/close is clicked/pressed
                     window.close(); //close the game                        	    
             }
-          
-	    //if (Keyboard::isKeyPressed(Keyboard::Left)) //If left key is pressed
-     //           p->move("l");    // Player will move to left
-	    //else if (Keyboard::isKeyPressed(Keyboard::Right)) // If right key is pressed
-     //           p->move("r");  //player will move to right
-	    //else if (Keyboard::isKeyPressed(Keyboard::Up)) //If up key is pressed
-     //           p->move("u");    //playet will move upwards
-	    //else if (Keyboard::isKeyPressed(Keyboard::Down)) // If down key is pressed
-     //           p->move("d");  //player will move downwards
-     //   else if(Keyboard::isKeyPressed(Keyboard::Left) && Keyboard::isKeyPressed(Keyboard::Up))
-     //           p->move("lu");
-     //   else if(Keyboard::isKeyPressed(Keyboard::Right) && Keyboard::isKeyPressed(Keyboard::Up))
-     //            p->move("ru");
-	    //else if(Keyboard::isKeyPressed(Keyboard::Left) && Keyboard::isKeyPressed(Keyboard::Down))
-	    //		p->move("ld");
-	    //else if(Keyboard::isKeyPressed(Keyboard::Right) && Keyboard::isKeyPressed(Keyboard::Down))
-	    //		p->move("rd");
-	    //else if(Keyboard::isKeyPressed(Keyboard::Space))
-	    //		p->fire();
-	    //else if(Keyboard::isKeyPressed(Keyboard::Escape))
-	    //		window.close();
+
             float delta_x = 0, delta_y = 0;
 
             if (Keyboard::isKeyPressed(Keyboard::Left)) {
@@ -189,20 +189,25 @@ public:
                 delta_y = 1; //move the player down
             }
             if (Keyboard::isKeyPressed(Keyboard::Space) || p->powerup)
-				p->shoot(&window, timer);
+                p->shoot(&window, timer);
             if (Keyboard::isKeyPressed(Keyboard::Escape))
-                return -1;
-            if (Keyboard::isKeyPressed(Keyboard::F) && fireused==1) {        //enages the fire powerup
+                Pause(window);
+            if (Keyboard::isKeyPressed(Keyboard::F) && fireused > 0) {        //enages the fire powerup
                 p->Fire = true;
                 fireInitiat_time = timer;
                 fireused--;
                 cout << "Fire enetiated!\n";
             }
-
-           //check if 5 seconds have passed since fire powerup was engaged
-            if (timer - fireInitiat_time > 5 && p->Fire == true) {
-				p->Fire = false;
+            //if 20 seconds have passed in level 3 then the player wins
+            if (timer > 20 && level == 3) {
+				return -1;
 			}
+            
+
+            //check if 5 seconds have passed since fire powerup was engaged
+            if (timer - fireInitiat_time > 5 && p->Fire == true) {
+                p->Fire = false;
+            }
 
             // check for diagonal movement
             if (delta_x != 0 && delta_y != 0) {
@@ -236,38 +241,39 @@ public:
                 }
             }
 
-        //checking for power up
+            //checking for power up
             if (p->sprite.getGlobalBounds().intersects(powerUp.sprite.getGlobalBounds())) {
                 powerUp.activate(timer);
-                
+
                 cout << "POWERED UP!!\n";
             }
 
-        //Checking for collision between player and enemies
+            //Checking for collision between player and enemies
             for (int i = 0; i < enemies.size(); i++) {
                 if (p->sprite.getGlobalBounds().intersects(enemies[i]->sprite.getGlobalBounds())) {
-					//keep the player away from the enemy
+                    //keep the player away from the enemy
                     if (delta_x < 0) {
-						p->move("r");
-					}
+                        p->move("r");
+                    }
                     else if (delta_x > 0) {
-						p->move("l");
-					}
+                        p->move("l");
+                    }
                     else if (delta_y < 0) {
-						p->move("d");
-					}
+                        p->move("d");
+                    }
                     else if (delta_y > 0) {
-						p->move("u");
-					}
+                        p->move("u");
+                    }
                     lifes--;
                     //erase all enemies
-                    enemies.erase(enemies.begin(), enemies.end());
-                    p->sprite.setPosition(400, 780);
-                    
+                    //enemies.erase(enemies.begin(), enemies.end());
+                    p->sprite.setPosition(350, 780);
+                    window.draw(p->sprite);
+
                     return 0;
-				}
-			}
-        //Checking for collision between bullets and enemies
+                }
+            }
+            //Checking for collision between bullets and enemies
             for (int i = 0; i < p->bullets.size(); i++) {
                 for (int j = 0; j < enemies.size(); j++) {
                     if (p->bullets[i]->sprite.getGlobalBounds().intersects(enemies[j]->sprite.getGlobalBounds())) {
@@ -280,27 +286,27 @@ public:
                             }
                         }
                         else {  //keep the bullet moving and erase every enemy in its path
-							enemies[j]->health -= p->bullets[i]->damage;
+                            enemies[j]->health -= p->bullets[i]->damage;
                             if (enemies[j]->health <= 0) {
-								enemies.erase(enemies.begin() + j);
-								score += 10;
-							}
+                                enemies.erase(enemies.begin() + j);
+                                score += 10;
+                            }
 
                         }
-						break;
-					}
-				}
-			}
-        //Checking for collision between enemy bullets and player
+                        break;
+                    }
+                }
+            }
+            //Checking for collision between enemy bullets and player
             for (int i = 0; i < enemies.size(); i++) {
                 for (int j = 0; j < enemies[i]->bullets.size(); j++) {
                     if (enemies[i]->bullets[j]->sprite.getGlobalBounds().intersects(p->sprite.getGlobalBounds())) {
                         if (!powerUp.isActive()) {
-							p->health -= enemies[i]->bullets[j]->damage;
-						}
+                            p->health -= enemies[i]->bullets[j]->damage;
+                        }
                         else {      //in powerUp mode, player is invincible
-							p->health += 0;
-						}
+                            p->health += 0;
+                        }
                         enemies[i]->bullets.erase(enemies[i]->bullets.begin() + j);
                         if (p->health <= 0) {
                             return 0;
@@ -311,69 +317,43 @@ public:
             }
             //checking for collision between player and danger
             //for (int i = 0; i < danger.size(); i++) {
-                if (p->sprite.getGlobalBounds().intersects(danger.sprite.getGlobalBounds())) {
-					lifes--;
-                    enemies.erase(enemies.begin(), enemies.end());
+            if (p->sprite.getGlobalBounds().intersects(danger.sprite.getGlobalBounds())) {
+                lifes--;
+                enemies.erase(enemies.begin(), enemies.end());
 
-                    p->sprite.setPosition(400, 700);
-                    danger.sprite.setPosition(1000, 1000);
-					return 0;
-				}
-			//}
-                if(p->sprite.getGlobalBounds().intersects(lives_power.sprite.getGlobalBounds())) {
-                    lifes++;
-					lives_power.sprite.setPosition(1000, 1000);
-                }
+                p->sprite.setPosition(350, 780);
+                window.draw(p->sprite);
+                danger.sprite.setPosition(1000, 1000);
+                return 0;
+            }
+            
+            if (p->sprite.getGlobalBounds().intersects(lives_power.sprite.getGlobalBounds())) {
+                lifes++;
+                lives_power.sprite.setPosition(1000, 1000);
+            }
 
             if (enemies.size() == 0 && level == 3)
                 return -1;
             else if (enemies.size() == 0)
                 return 1;
-            
+
 
             /*cout<<"StartTime:"<<powerUp.startTime << endl;
             cout << "TimeNow:" << timer << endl;*/
             p->powerup = powerUp.isActive();
-	    ////////////////////////////////////////////////
-	    /////  Call your functions here            ////
-	    //////////////////////////////////////////////
+            ////////////////////////////////////////////////
+            /////  Call your functions here            ////
+            //////////////////////////////////////////////
             for (int i = 0; i < p->bullets.size(); i++) {
                 /*p->bullets[i].x = (p->x - 30) + (i * 10);
                 p->bullets[i].y = p->y + 100;*/
                 //p->bullets[i].sprite.setPosition(Vector2f((p->x - 20) + (i * 10), p->y + 10));
-                
+
                 p->bullets[i]->move(false, p->sprite.getPosition().x, p->sprite.getPosition().y);
                 window.draw(p->bullets[i]->sprite);
             }
-            /*if (timer > 20) {
-				timer = 0;
-				int x = rand() % 780;
-				int y = rand() % 780;
-				enemy.push_back(Enemy(x, y));
-			}
-            for (int i = 0; i < enemy.size(); i++) {
-				enemy[i].move();
-				window.draw(enemy[i]);
-			}
-            for (int i = 0; i < enemy.size(); i++) {
-                for (int j = 0; j < player.bullets.size(); j++) {
-                    if (enemy[i].getGlobalBounds().intersects(player.bullets[j].getGlobalBounds())) {
-						enemy.erase(enemy.begin() + i);
-						player.bullets.erase(player.bullets.begin() + j);
-					}
-				}
-			}
-            for (int i = 0; i < enemy.size(); i++) {
-                if (enemy[i].getGlobalBounds().intersects(player.getGlobalBounds())) {
-					enemy.erase(enemy.begin() + i);
-					player.health--;
-				}
-			}
-            if (player.health <= 0) {
-				window.close();
-			}*/
             //2 random enemies call update function
-            
+
             if (level == 1) {
                 int i = rand() % enemies.size();
                 int j = rand() % enemies.size();
@@ -387,15 +367,15 @@ public:
                 //There's only 1 enemy
                 enemies[0]->update(timer, &window, p->sprite.getPosition().x, p->sprite.getPosition().y);
             }
-			
-           //updating the score life and level
+
+            //updating the score life and level
             Score.setString("Score: " + to_string(score));
-			Life.setString("Life: " + to_string(lifes));
-			Level.setString("Level: " + to_string(level));
+            Life.setString("Life: " + to_string(lifes));
+            Level.setString("Level: " + to_string(level));
             time_string.setString("Time: " + to_string((int)timer));
-			
+
             //Moving Danger sign
-            if (int(timer) % int(10.0) == 0 ) {
+            if (timer > 10.0f ) {
                 danger.move();
             }
             //moving Lifes
@@ -404,49 +384,73 @@ public:
 
             //moving enemies
             for (int i = 0; i < enemies.size(); i++) {
-				enemies[i]->move();
-			}
-			
-
-	    window.clear(Color::Black); //clears the screen
-	    window.draw(background);  // setting background
-	    window.draw(p->sprite);   // setting player on screen
-        
-        for (int i = 0; i < p->bullets.size(); i++) {
-            p->bullets[i]->move(false, p->sprite.getPosition().x, p->sprite.getPosition().y);
-            window.draw(p->bullets[i]->sprite);
-        }
-        //Draw enemies
-        for (int i = 0; i < enemies.size(); i++) {
-            for (int j = 0; j < enemies[i]->bullets.size(); j++) {
-				enemies[i]->bullets[j]->move(true, p->sprite.getPosition().x, p->sprite.getPosition().y);
-				window.draw(enemies[i]->bullets[j]->sprite);
-			}
-			window.draw(enemies[i]->sprite);
-		}
-
-        powerUp.update(timer);
-
-        if(timer > 10.0f)
-            window.draw(danger.sprite);
-        if (timer > 15.0f)
-            window.draw(lives_power.sprite);
-        
-        window.draw(powerUp.sprite);
-        //drawing the score life and level
-        window.draw(Score);
-        window.draw(Life);
-        window.draw(Level);
-        window.draw(time_string);
+                enemies[i]->move();
+            }
 
 
-	    window.display();  //Displying all the sprites
+            window.clear(Color::Black); //clears the screen
+            window.draw(background);  // setting background
+            window.draw(p->sprite);   // setting player on screen
+
+            for (int i = 0; i < p->bullets.size(); i++) {
+                p->bullets[i]->move(false, p->sprite.getPosition().x, p->sprite.getPosition().y);
+                window.draw(p->bullets[i]->sprite);
+            }
+            //Draw enemies
+            for (int i = 0; i < enemies.size(); i++) {
+                for (int j = 0; j < enemies[i]->bullets.size(); j++) {
+                    enemies[i]->bullets[j]->move(true, p->sprite.getPosition().x, p->sprite.getPosition().y);
+                    window.draw(enemies[i]->bullets[j]->sprite);
+                }
+                window.draw(enemies[i]->sprite);
+            }
+
+            powerUp.update(timer);
+
+            if (timer > 10.0f )
+                window.draw(danger.sprite);
+            if (timer > 15.0f)
+                window.draw(lives_power.sprite);
+
+            window.draw(powerUp.sprite);
+            //drawing the score life and level
+            window.draw(Score);
+            window.draw(Life);
+            window.draw(Level);
+            window.draw(time_string);
+
+
+            window.display();  //Displying all the sprites
         }
 
     }
+
+    void Pause(RenderWindow& window) {
+        while (window.isOpen()) {
+			Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == Event::Closed) {
+					window.close();
+				}
+                if (event.type == Event::KeyPressed) {
+                    if (event.key.code == Keyboard::Enter) {
+						return;
+					}
+				}
+			}
+			//window.clear(Color::Black);
+			window.draw(Paused_text1);
+            window.draw(Paused_text2);
+			window.display();
+		}
+    }
+
+    
 
     void resetFire() {
-        fireused = 1;
+        return;
     }
 };
+
+
 

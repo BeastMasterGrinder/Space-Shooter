@@ -1,10 +1,7 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include <time.h>
 #include <iostream>
-using namespace std;
-using namespace sf;
 
 class PowerUp {
 private:
@@ -15,7 +12,7 @@ public:
     Sprite sprite;
     Texture texture;
     Clock timer;
-    PowerUp() {
+    PowerUp(){
         srand(time(0));
         duration = 0;
         startTime = 0;
@@ -50,7 +47,7 @@ public:
 
     void update(float timer) {
         if (Active) {
-			duration -= (timer - startTime);
+            duration -= (timer - startTime);
             if (duration <= 0) {
                 Active = false;
             }

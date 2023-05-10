@@ -1,6 +1,4 @@
 #pragma once
-//#include <SFML/Graphics.hpp>
-//#include <iostream>
 #include <vector>
 #include"bullet.h"
 using namespace std;
@@ -98,7 +96,7 @@ public:
 
 			score = 40 * enemyLevel;
 			dropInterval = 2.0f; // 3 seconds interval
-			health = 2500;
+			health = 350;
 			//sprite.setTexture(Monster); // Replace with the appropriate texture for Gamma Invader
             sprite.setScale(0.5f, 0.5f);
 			break;
@@ -108,7 +106,7 @@ public:
             //sprite.setTextureRect(sf::IntRect(0, 0, 400, 400));
 
             score = 50 * enemyLevel;
-            dropInterval = 2.0f; // 5.0 seconds interval
+            dropInterval = 1.0f; // 1.0 seconds interval
             health = 10000;
             //sprite.setTexture(Dragon); // Replace with the appropriate texture for Gamma Invader
             sprite.setPosition(sf::Vector2f(100, 10)); // Set the initial position
@@ -159,9 +157,7 @@ public:
                 bullets.push_back(new_bullet); // Add the bullet to the vector
                 x +=50;
             }
-            /*bomb->damage = 50;
-            bomb->speed = 1.2f;
-            bullets.push_back(bomb);*/
+            
         }
         else if (enemyLevel == 3) {
             
@@ -190,7 +186,7 @@ public:
             float currentAngle = angle;
 
             // Create four bullets
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 Bullet* new_bullet = new Bullet(window, "img/PNG/Effects/fire10.png", bulletX, bulletY); // Create a new bullet object
 
                 new_bullet->sprite.setRotation(currentAngle); // Set the rotation angle for the bullet sprite
@@ -256,11 +252,11 @@ public:
 
             // Rest of the code...
         }
-        
+
     }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const {
-		target.draw(sprite);
-	}
+        target.draw(sprite);
+    }
 
 };
