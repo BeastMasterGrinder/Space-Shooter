@@ -131,9 +131,6 @@ Menu::Menu()
                 else if (gameStatus == -1)
                     isGameStarted = false;
             }
-            else if (isGamePaused) { //game paused
-                /*display_pause_menu(window);*/
-            }
             else if (gameStatus == -1 || lifes == 0) {  //game ended
                 display_endscreen_menu(window);
                 isGameEnded = true;

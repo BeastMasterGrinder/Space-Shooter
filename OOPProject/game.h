@@ -199,7 +199,7 @@ public:
                 cout << "Fire enetiated!\n";
             }
             //if 20 seconds have passed in level 3 then the player wins
-            if (timer > 20 && level == 3) {
+            if (timer >= 5 && level == 3) {
 				return -1;
 			}
             
